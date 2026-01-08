@@ -6,8 +6,22 @@ export const HERO_DATA = {
   summary: "사용자 중심의 모바일 서비스를 설계하고, 레거시 시스템을 현대적인 아키텍처로 개선하는 데 열정을 가진 안드로이드 개발자입니다.",
 };
 
-export const SKILL_METRICS: SkillMetric[] = [];
-export const SKILL_CATEGORIES: SkillCategory[] = [];
+export const SKILL_METRICS: SkillMetric[] = [
+  { subject: "Android", A: 95, fullMark: 100 },
+  { subject: "Kotlin", A: 90, fullMark: 100 },
+  { subject: "Architecture", A: 85, fullMark: 100 },
+  { subject: "Async", A: 85, fullMark: 100 },
+  { subject: "CI/CD", A: 70, fullMark: 100 },
+  { subject: "UI/UX", A: 80, fullMark: 100 },
+];
+
+export const SKILL_CATEGORIES: SkillCategory[] = [
+  { category: "Languages", skills: ["Kotlin", "Java", "Python"] },
+  { category: "Android", skills: ["Jetpack Compose", "Android Auto", "MVVM/MVI", "Clean Architecture"] },
+  { category: "Async", skills: ["Coroutines", "Flow", "RxJava"] },
+  { category: "Network", skills: ["Retrofit2", "OkHttp", "gRPC"] },
+  { category: "Database", skills: ["Room", "Realm", "SQLite"] },
+];
 
 export const PROJECTS: Project[] = [
   {
@@ -24,7 +38,7 @@ export const PROJECTS: Project[] = [
       },
       { 
         title: "사용자 맞춤형 데이터 바인딩 시스템", 
-        desc: "같은 '속도' 항목이라도 내연기관 차량의 엔진 ECU에서 제공하는 데이터 인덱스와 전기차의 VCU에서 제공하는 데이터 인덱스는 서로 다릅니 다. 사용자가 설정 화면에서 본인 차량에 맞는 데이터 인덱스를 선택하면, 해당 선택이 프로필별로 저장되고 대시보드에서는 저장된 설정에 따라 올바른 데이터를 자동으로 연결하는 동적 바인딩 시스템을 구현했습니다." 
+        desc: "같은 '속도' 항목이라도 내연기관 차량의 엔진 ECU에서 제공하는 데이터 인덱스와 전기차의 VCU에서 제공하는 데이터 인덱스는 서로 다릅니다. 사용자가 설정 화면에서 본인 차량에 맞는 데이터 인덱스를 선택하면, 해당 선택이 프로필별로 저장되고 대시보드에서는 저장된 설정에 따라 올바른 데이터를 자동으로 연결하는 동적 바인딩 시스템을 구현했습니다." 
       },
       { 
         title: "데이터 조회 성능 최적화", 
@@ -32,7 +46,7 @@ export const PROJECTS: Project[] = [
       },
       { 
         title: "스레드 안전 스케줄링", 
-        desc: "대시보드 페이지를 빠르게 스와이프할 때, 각 페이지마다 OBD 스캐너에 데이터 요청이 발생하여 블루투스 통신이 과부하되는 문제가 있었습 니다. 이를 해결하기 위해 ConcurrentLinkedQueue 기반의 요청 큐 시스템을 도입하여, 빠른 스와이프 시에도 가장 마지막 페이지의 요청만 실 행되도록 구현했습니다." 
+        desc: "대시보드 페이지를 빠르게 스와이프할 때, 각 페이지마다 OBD 스캐너에 데이터 요청이 발생하여 블루투스 통신이 과부하되는 문제가 있었습니다. 이를 해결하기 위해 ConcurrentLinkedQueue 기반의 요청 큐 시스템을 도입하여, 빠른 스와이프 시에도 가장 마지막 페이지의 요청만 실행되도록 구현했습니다." 
       },
       { 
         title: "하이브리드 뷰 시스템", 
@@ -76,7 +90,25 @@ export const PROJECTS: Project[] = [
       {
         title: "3. 핵심 문제 해결 및 최적화 (Troubleshooting)",
         type: "text",
-        content: ":::1. 프로파일 기반 설정 격리 (데이터 충돌 방지):::\n문제: 차량 변경 시 이전 차량의 설정값(DataStore)이 남아있어 데이터가 오동작하는 치명적인 버그가 있었습니다.\n해결: 설정 저장 시 키 생성 로직에 `profile_id`를 접두어로 포함시켜, 차량별로 저장소 공간을 논리적으로 격리했습니다.\n효과: 다수의 차량을 등록해도 설정 충돌이 발생하지 않으며, 각 차량 고유의 데이터 매핑이 완벽하게 보존됩니다.\n\n:::2. 멀티스레드 안정성 및 스케줄링 큐잉:::\n문제: 다중 스레드 접근 시 `ConcurrentModificationException`이 발생하고, 빠른 화면 전환 시 블루투스 요청이 병목을 일으켰습니다.\n해결: `ConcurrentHashMap`으로 스레드 안전성을 확보하고, `ConcurrentLinkedQueue` 기반의 Last-Win 전략을 도입하여 이전 페이지의 요청을 자동 취소했습니다.\n효과: 멀티스레드 환경 크래시 0건 달성 및 스와이프 시 끊김 없는 데이터 스트림을 구현했습니다.\n\n:::3. 데이터 식별 정확도 및 3단계 캐싱:::\n문제: 표준/제조사 데이터 키가 중복될 때 충돌이 발생하고, 잦은 DB 조회로 프레임 드랍이 있었습니다.\n해결: 제조사 데이터에 복합 키(`index|ecu_cmd`) 전략을 적용하여 식별성을 강화하고, `ParameterRepository`에 3단계(페이지-개별-키) 메모리 캐싱을 적용했습니다.\n효과: DB 쿼리 횟수 90% 감소로 화면 로딩 속도를 획기적으로 개선했습니다.\n\n:::4. Hybrid UI (XML + Compose) 통합:::\n문제: 기존 XML 레이아웃 기반의 수십 개 게이지를 한 번에 재작성하는 것은 리스크가 컸습니다.\n해결: `ComposeView`를 활용하여 신규 텍스트형 게이지부터 점진적으로 Jetpack Compose로 전환하는 하이브리드 구조를 채택했습니다.\n효과: 레거시 시스템의 안정성을 유지하면서도 최신 UI 기술을 성공적으로 도입했습니다."
+        content: `:::1. 프로파일 기반 설정 격리 (데이터 충돌 방지):::
+문제: 차량 변경 시 이전 차량의 설정값(DataStore)이 남아있어 데이터가 오동작하는 치명적인 버그가 있었습니다.
+해결: 설정 저장 시 키 생성 로직에 \`profile_id\`를 접두어로 포함시켜, 차량별로 저장소 공간을 논리적으로 격리했습니다.
+효과: 다수의 차량을 등록해도 설정 충돌이 발생하지 않으며, 각 차량 고유의 데이터 매핑이 완벽하게 보존됩니다.
+
+:::2. 멀티스레드 안정성 및 스케줄링 큐잉:::
+문제: 다중 스레드 접근 시 \`ConcurrentModificationException\`이 발생하고, 빠른 화면 전환 시 블루투스 요청이 병목을 일으켰습니다.
+해결: \`ConcurrentHashMap\`으로 스레드 안전성을 확보하고, \`ConcurrentLinkedQueue\` 기반의 Last-Win 전략을 도입하여 이전 페이지의 요청을 자동 취소했습니다.
+효과: 멀티스레드 환경 크래시 0건 달성 및 스와이프 시 끊김 없는 데이터 스트림을 구현했습니다.
+
+:::3. 데이터 식별 정확도 및 3단계 캐싱:::
+문제: 표준/제조사 데이터 키가 중복될 때 충돌이 발생하고, 잦은 DB 조회로 프레임 드랍이 있었습니다.
+해결: 제조사 데이터에 복합 키(\`index|ecu_cmd\`) 전략을 적용하여 식별성을 강화하고, \`ParameterRepository\`에 3단계(페이지-개별-키) 메모리 캐싱을 적용했습니다.
+효과: DB 쿼리 횟수 90% 감소로 화면 로딩 속도를 획기적으로 개선했습니다.
+
+:::4. Hybrid UI (XML + Compose) 통합:::
+문제: 기존 XML 레이아웃 기반의 수십 개 게이지를 한 번에 재작성하는 것은 리스크가 컸습니다.
+해결: \`ComposeView\`를 활용하여 신규 텍스트형 게이지부터 점진적으로 Jetpack Compose로 전환하는 하이브리드 구조를 채택했습니다.
+효과: 레거시 시스템의 안정성을 유지하면서도 최신 UI 기술을 성공적으로 도입했습니다.`
       }
     ],
     detailedTechStack: [
@@ -137,9 +169,31 @@ export const PROJECTS: Project[] = [
         ])
       },
       {
-        title: "3. 핵심 로직 및 최적화 전략 (Core Logic)",
+        title: "3. 핵심 문제 해결 및 최적화 (Troubleshooting)",
         type: "text",
-        content: ":::1. Sealed Class를 활용한 다형성 폼 관리:::\n문제: 배차 신청 화면은 '시간 선택', '차량 선택', '목적 입력' 등 서로 다른 UI 요소가 복잡하게 섞여 있어 관리가 어려웠습니다.\n해결: `DraftItem`이라는 Sealed Class를 정의하고 `AllDay`, `Time`, `Selection` 등의 하위 타입을 만들었습니다. Adapter에서는 `when` 식을 사용하여 각 타입에 맞는 ViewHolder를 정확하게 생성하고 바인딩합니다.\n효과: 새로운 입력 타입이 추가되더라도 기존 코드를 수정할 필요 없이 타입만 확장하면 되므로 유지보수성이 크게 향상되었습니다.\n\n:::2. Double-Checked Locking Singleton:::\n문제: 여러 화면에서 동시에 Repository에 접근할 때 불필요한 인스턴스가 생성되거나 동시성 문제가 발생할 우려가 있었습니다.\n해결: `synchronized` 블록과 `volatile` 키워드를 사용한 Double-Checked Locking 패턴을 적용하여, 멀티스레드 환경에서도 안전하고 효율적인 싱글톤 인스턴스 생성을 보장했습니다.\n효과: 메모리 낭비를 막고 앱 전체에서 일관된 데이터 소스를 공유할 수 있게 되었습니다.\n\n:::3. 자동 시간 보정 알고리즘:::\n문제: 사용자가 실수로 종료 시간을 시작 시간보다 앞서게 설정하면 배차 신청이 실패하거나 데이터 무결성이 깨졌습니다.\n해결: `DraftViewModel` 내에 시간 검증 로직을 두어, 시작 시간이 종료 시간보다 늦어지는 순간 자동으로 종료 시간을 '시작 시간 + 30분'으로 재계산하여 업데이트합니다.\n효과: 사용자 실수를 사전에 방지하고 별도의 에러 팝업 없이 자연스러운 UX 흐름을 제공했습니다."
+        content: `:::1. Coroutine + Flow 기반 반응형 스트림:::
+문제: 기존 Callback 방식은 'Callback 지옥'을 유발하고 에러 처리가 복잡했습니다.
+해결: \`Repository\`에서 \`Flow<Result>\`를 반환하고, ViewModel에서 \`launchIn\`을 통해 구독하는 구조로 변경했습니다.
+효과: 코드 가독성이 향상되었으며, \`viewModelScope\`를 통해 생명주기에 맞춰 비동기 작업이 자동 취소되므로 메모리 누수를 방지했습니다.
+
+:::2. StateFlow 및 중복 요청 방지 (Debounce):::
+문제: 사용자가 빠르게 스크롤하거나 탭을 전환할 때 동일한 API가 중복 호출되는 문제가 있었습니다.
+해결: \`isLoading\` 플래그와 \`hasNetPage\` 검사를 도입하고, Handler를 이용해 50ms 지연(Throttling)을 적용했습니다.
+효과: 불필요한 API 호출을 90% 이상 감소시켜 서버 부하를 줄였습니다.
+
+:::3. Sealed Class 기반 타입 안전 폼 관리:::
+문제: '시간 선택', '차량 선택', '체크박스' 등 다양한 입력 타입이 혼재된 화면을 단일 어댑터로 관리하기 어려웠습니다.
+해결: \`DraftItem\` Sealed Class를 정의하여 컴파일 타임에 모든 경우의 수(\`when\` 식)를 처리하도록 강제했습니다.
+효과: 새로운 입력 타입 추가 시 발생할 수 있는 런타임 에러를 원천 차단했습니다.
+
+:::4. 시간 자동 보정 알고리즘 (UX 개선):::
+문제: 사용자가 종료 시간을 시작 시간보다 앞서게 설정하는 실수가 잦았습니다.
+해결: \`DraftViewModel\`에서 시간 변경을 감지하여, 시작 시간이 종료 시간보다 늦어질 경우 자동으로 '종료 시간 = 시작 시간 + 30분'으로 보정하는 로직을 추가했습니다.
+효과: 별도의 에러 팝업 없이 자연스러운 사용자 경험을 제공했습니다.
+
+:::5. JSON 파싱 안전성 강화:::
+문제: 서버 응답에 필수 필드가 누락될 경우 앱이 크래시되는 현상이 있었습니다.
+해결: \`optString\`, \`optInt\` 메서드를 활용하고 이중 try-catch 블록을 적용하여, 데이터가 불완전하더라도 기본값을 사용하여 화면이 렌더링되도록 방어 코드를 작성했습니다.`
       }
     ],
     detailedTechStack: [
@@ -203,7 +257,20 @@ export const PROJECTS: Project[] = [
       {
         title: "3. 핵심 문제 해결 및 최적화 (Troubleshooting)",
         type: "text",
-        content: ":::1. 세로 동영상 광고로 인한 UI 붕괴 방지:::\n문제: 네이티브 광고 영역에 '세로 비율(Portrait)' 동영상이 로드될 경우 레이아웃이 깨지는 현상이 발생했습니다.\n해결: `NativeAdManager`에서 미디어의 Aspect Ratio를 사전에 검사하여, 비율이 1.0 미만(세로)인 경우 최대 3회까지 재요청하는 로직을 추가했습니다.\n효과: UI 일관성을 유지하고, 사용자 경험에 최적화된 가로형 광고를 우선적으로 노출했습니다.\n\n:::2. 스플래시 로딩 속도 70% 단축 (병렬 처리):::\n문제: 5가지 타입(배너, 메인, 메뉴, 종료 등)의 광고를 순차적으로 로드하다 보니 앱 진입 속도가 크게 지연되었습니다.\n해결: `CompletableFuture`를 도입하여 모든 광고 로딩을 병렬로 처리하고, 10초 타임아웃을 설정하여 무한 대기를 방지했습니다.\n효과: 초기 광고 준비 시간을 기존 5초에서 1.5초 수준으로 약 70% 단축했습니다.\n\n:::3. 중복 노출 및 불필요한 요청 제거:::\n문제: Fragment 재생성 시마다 동일한 광고가 반복 로드되거나, 구독자에게도 광고 요청이 발생하는 낭비가 있었습니다.\n해결: 마지막으로 노출된 Fragment의 클래스명을 추적하여 중복 표시를 방지하고, 지역·구독·스캐너 연결 여부를 종합 판단하는 `AdvertisingTerms()` 검증 함수를 구현했습니다.\n효과: 불필요한 네트워크 리소스 소모를 줄이고, 타겟팅 정확도를 높여 eCPM 효율을 개선했습니다."
+        content: `:::1. 세로 동영상 광고로 인한 UI 붕괴 방지:::
+문제: 네이티브 광고 영역에 '세로 비율(Portrait)' 동영상이 로드될 경우 레이아웃이 깨지는 현상이 발생했습니다.
+해결: \`NativeAdManager\`에서 미디어의 Aspect Ratio를 사전에 검사하여, 비율이 1.0 미만(세로)인 경우 최대 3회까지 재요청하는 로직을 추가했습니다.
+효과: UI 일관성을 유지하고, 사용자 경험에 최적화된 가로형 광고를 우선적으로 노출했습니다.
+
+:::2. 스플래시 로딩 속도 70% 단축 (병렬 처리):::
+문제: 5가지 타입(배너, 메인, 메뉴, 종료 등)의 광고를 순차적으로 로드하다 보니 앱 진입 속도가 크게 지연되었습니다.
+해결: \`CompletableFuture\`를 도입하여 모든 광고 로딩을 병렬로 처리하고, 10초 타임아웃을 설정하여 무한 대기를 방지했습니다.
+효과: 초기 광고 준비 시간을 기존 5초에서 1.5초 수준으로 약 70% 단축했습니다.
+
+:::3. 중복 노출 및 불필요한 요청 제거:::
+문제: Fragment 재생성 시마다 동일한 광고가 반복 로드되거나, 구독자에게도 광고 요청이 발생하는 낭비가 있었습니다.
+해결: 마지막으로 노출된 Fragment의 클래스명을 추적하여 중복 표시를 방지하고, 지역·구독·스캐너 연결 여부를 종합 판단하는 \`AdvertisingTerms()\` 검증 함수를 구현했습니다.
+효과: 불필요한 네트워크 리소스 소모를 줄이고, 타겟팅 정확도를 높여 eCPM 효율을 개선했습니다.`
       },
       {
         title: "4. 광고 노출 조건 판단 흐름",
@@ -291,7 +358,14 @@ export const PROJECTS: Project[] = [
       {
         title: "3. 안정성 확보 및 트러블 슈팅 (Stability & Troubleshooting)",
         type: "text",
-        content: ":::1. UI 플리커링(깜빡임) 방지:::\n문제: OBD 데이터가 100ms 단위로 수신될 때마다 화면 갱신을 요청하여, 차량 디스플레이에서 심한 깜빡임과 CPU 과부하가 발생했습니다.\n해결: `StandardDataScreen`에 1초 단위의 쓰로틀링(Throttling) 로직을 적용하여, 마지막 갱신 이후 1초가 지나지 않았으면 요청을 무시하도록 최적화했습니다.\n효과: 화면 깜빡임을 제거하고 안정적인 프레임을 확보했습니다.\n\n:::2. 메모리 누수 방지:::\n문제: 잦은 연결/해제 반복 시 싱글톤 인스턴스와 핸들러가 해제되지 않아 메모리 점유율이 증가했습니다.\n해결: `onDestroy()`에서 `bleManager.disconnect()` 호출 및 Handler 콜백 제거(removeCallbacksAndMessages)를 명시적으로 수행했습니다."
+        content: `:::1. UI 플리커링(깜빡임) 방지:::
+문제: OBD 데이터가 100ms 단위로 수신될 때마다 화면 갱신을 요청하여, 차량 디스플레이에서 심한 깜빡임과 CPU 과부하가 발생했습니다.
+해결: \`StandardDataScreen\`에 1초 단위의 쓰로틀링(Throttling) 로직을 적용하여, 마지막 갱신 이후 1초가 지나지 않았으면 요청을 무시하도록 최적화했습니다.
+효과: 화면 깜빡임을 제거하고 안정적인 프레임을 확보했습니다.
+
+:::2. 메모리 누수 방지:::
+문제: 잦은 연결/해제 반복 시 싱글톤 인스턴스와 핸들러가 해제되지 않아 메모리 점유율이 증가했습니다.
+해결: \`onDestroy()\`에서 \`bleManager.disconnect()\` 호출 및 Handler 콜백 제거(removeCallbacksAndMessages)를 명시적으로 수행했습니다.`
       },
       {
         title: "4. 데이터 동기화 흐름",
@@ -323,26 +397,104 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "p1",
-    title: "차계부 시스템 리뉴얼",
+    title: "차계부 시스템 리뉴얼 (CarBook)",
     period: "2022.10 ~ 2023.06",
-    overview: "주유, 정비, 세차, 소모품 교체 등 차량 유지비를 통합 관리하는 가계부 시스템입니다. 월별 비용 비교와 항목별 지출 비중을 시각화하고, 소모품 교체 주기를 거리·시간 기준으로 자동 계산하여 알림을 제공합니다.",
+    overview: "개인 사용자의 차량 유지비(주유, 정비, 세차) 관리 시스템으로, 레거시 단일 테이블 구조에서 엔티티별 분리된 신규 데이터 모델로 마이그레이션하고, 다국어/다단위 지원 및 서버 동기화 기능을 제공하는 프로젝트입니다. DataBridge 패턴을 통한 데이터 접근 계층 추상화와 BigDecimal을 활용한 정밀한 금액 연산을 특징으로 합니다.",
     team: "PM 1명, Android 1명, Server 1명, Design 1명",
     scope: "주유/정비/세차 기록 기능 전체 설계 및 소모품 관리 시스템 통합 개발",
     keyFeatures: [
-      { title: "DB 설계 및 마이그레이션", desc: "FUELING, REPAIR, CARWASH 등 5개 핵심 테이블 설계 및 버전별 마이그레이션 구현" },
-      { title: "커스텀 컴포넌트 개발", desc: "진동/애니메이션 숫자 키패드, Dot Decorator 달력, 갤러리 바텀시트 구현" },
-      { title: "오피넷 API 연동", desc: "사용자 위치 기반 주유소 검색, 실시간 유가 정보 매핑 및 마커 클러스터링 처리" },
-      { title: "서버 동기화", desc: "차계부 데이터 백업/복구 API 연동으로 기기 변경 시 데이터 유지 보장" },
-      { title: "글로벌 대응", desc: "10개국 이상의 다국어 번역 적용 및 RTL(아랍어) 레이아웃 대응" }
+      { title: "레거시 데이터 마이그레이션", desc: "단일 테이블(CARBOOK)에 혼재되어 있던 주유/정비/세차 데이터를 FUELING, REPAIR 등 독립된 엔티티로 분리하고, 앱 실행 시 'CarBookDBMigrationManager'를 통해 기존 데이터를 자동으로 분석하여 신규 구조로 이관하는 마이그레이션 로직을 구현했습니다." },
+      { title: "DataBridge 패턴 도입", desc: "Fragment에서 DB에 직접 접근하던 방식을 개선하여, 모든 CRUD 연산을 'DataBridge' 클래스로 캡슐화했습니다. 이를 'CarBookDBManager'에서 통합 관리함으로써 UI 계층과 데이터 계층의 의존성을 완벽하게 분리했습니다." },
+      { title: "글로벌 대응 (I18n)", desc: "국가별 통화(₩, $, €), 주유 단위(L, gal), 거리 단위(km, mi)를 동적으로 처리하는 'UnitComponent'와, 천단위 구분 기호(쉼표/마침표)를 Locale에 맞춰 변환하는 'DecimalComponent'를 구현하여 전 세계 사용자에게 현지화된 경험을 제공했습니다." },
+      { title: "단일 책임 원칙 (SRP) 적용", desc: "비대해진 Fragment의 책임을 분산시키기 위해 저장 로직은 'CarBookSaveHelper', 뷰 설정은 'CarBookViewHelper', 계산 로직은 'CalculateManager'로 분리하여 코드의 유지보수성과 가독성을 높였습니다." },
+      { title: "BigDecimal 정밀 연산", desc: "부동소수점 오차(Floating Point Error)가 발생할 수 있는 더블(Double) 타입 대신 'BigDecimal'을 도입하여, 주유 단가 계산이나 총 유지비 합산 시 1원 단위의 오차도 없는 정확한 금융 데이터를 보장했습니다." }
+    ],
+    technicalDetails: [
+      {
+        title: "1. 프로젝트 파일 구조",
+        type: "code",
+        content: `CarBook/
+  ├── Manager/
+  │   ├── CarBookDBManager.java           # DB 작업 통합 관리 (Facade Pattern)
+  │   ├── CarBookDBMigrationManager.java  # 레거시 데이터 마이그레이션
+  │   ├── CalculateManager.java           # 금액 계산 및 포맷팅
+  │   └── CarBookSaveHelper.java          # 저장 로직 (Java Record)
+  │
+  ├── CarBookMainFragment/
+  │   ├── CarBookMainFragment.java        # 홈 화면 (월별 통계)
+  │   ├── CarBookMainListAdapter.java     # 최근 기록 어댑터
+  │   └── CarBookMainTotal.java           # 통합 정렬 모델 (Comparable 구현)
+  │
+  ├── DataManager/DataBridge/             # 데이터 접근 계층 (Repository 역할)
+  │   ├── FUELING_DataBridge.java         # 주유 CRUD
+  │   ├── REPAIR_DataBridge.java          # 정비 CRUD
+  │   └── REPAIR_ITEM_DataBridge.java     # 정비 항목 관리
+  │
+  ├── DataBase/NEWCARBOOK/                # 신규 DB 스키마
+  │   ├── FUELING.java                    # 주유 Entity
+  │   ├── REPAIR.java                     # 정비 Entity
+  │   └── CONSUMABLE.java                 # 소모품 Entity
+  │
+  └── Tools/
+      ├── DecimalComponent.java           # Locale 기반 숫자 포맷팅
+      └── UnitComponent.java              # 단위 변환 유틸리티`
+      },
+      {
+        title: "2. 시스템 아키텍처 (Layered Architecture)",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "UI Layer (Fragment)", "desc": "CarBookMain / List / Detail\nHelper 클래스에 로직 위임", "type": "source" },
+          { "box": "Manager Layer", "desc": "CarBookDBManager: 트랜잭션 관리\nCalculateManager: 계산 로직", "type": "process" },
+          { "box": "DataBridge Layer", "desc": "각 도메인별(주유, 정비) CRUD 캡슐화\n직접적인 DB 쿼리 수행", "type": "process" },
+          { "box": "Database Layer", "desc": "Normalized Tables (정규화)\nLegacy Table (Migration Target)", "type": "solution" }
+        ])
+      },
+      {
+        title: "3. 핵심 문제 해결 및 최적화 (Troubleshooting)",
+        type: "text",
+        content: `:::1. 로컬 DB → 서버 기반 아키텍처 전환 (Sync):::
+문제: 로컬 DB 사용으로 기기 간 데이터 동기화가 불가능했습니다.
+해결: Retrofit 기반의 \`ExpenditureController\`를 도입하여 API 통신을 일원화하고, 로컬 DB 접근 로직을 서버 API 호출로 마이그레이션했습니다.
+효과: 멀티 디바이스 동기화 및 관리자 웹 연동이 가능해졌습니다.
+
+:::2. 네트워크 호환성 업그레이드 (NetworkCapabilities):::
+문제: \`NetworkInfo\`의 Deprecated로 인해 Android 10 이상에서 호환성 문제가 발생했습니다.
+해결: \`NetworkCapabilities\` API로 전환하여 \`TRANSPORT_WIFI\` 및 \`TRANSPORT_CELLULAR\`를 명시적으로 체크하도록 개선했습니다.
+효과: 최신 안드로이드 버전을 완벽하게 지원하고 레거시 코드를 제거했습니다.
+
+:::3. RxJava 메모리 누수 방지:::
+문제: 비동기 작업 중 Fragment가 종료될 때 \`Disposable\`이 해제되지 않아 메모리 누수가 발생했습니다.
+해결: \`onDestroy()\`에서 \`CompositeDisposable\`을 통해 모든 구독을 명시적으로 해제(\`dispose()\`)하는 방어 코드를 추가했습니다.
+효과: 메모리 누수를 0건으로 줄이고 앱의 안정성을 확보했습니다.
+
+:::4. 대용량 이미지 업로드 최적화:::
+문제: 고해상도 이미지 업로드 시 OOM(Out of Memory) 및 서버 타임아웃이 발생했습니다.
+해결: 파일 총 용량을 10MB로 제한하고, 업로드 개수를 최대 5개로 제한하는 로직을 적용하여 사전에 차단했습니다.
+효과: 이미지 업로드 실패율을 95% 감소시키고 서버 리소스를 절약했습니다.
+
+:::5. 화면 회전 시 UI 깨짐 방지:::
+문제: BottomSheetDialog가 떠 있는 상태에서 화면 회전 시 UI가 겹치거나 깨지는 현상이 있었습니다.
+해결: \`ViewTreeObserver.OnGlobalLayoutListener\`를 통해 화면 회전을 감지하고, 회전 발생 시 열려있는 다이얼로그를 자동으로 \`dismiss()\` 처리했습니다.
+효과: 동적인 화면 변화에도 안정적인 UX를 유지했습니다.`
+      },
+      {
+        title: "4. 데이터 마이그레이션 흐름",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "1. 레거시 데이터 감지", "desc": "App Start: 'CARBOOK' 테이블 존재 확인\n데이터가 있으면 마이그레이션 시작", "type": "source" },
+          { "box": "2. Migration Manager", "desc": "카테고리 코드(CD040001 등) 분석\n데이터 타입(주유/정비/세차) 분류", "type": "process" },
+          { "box": "3. 데이터 변환 (Transform)", "desc": "총비용 ÷ 주유량 = 단가 역산\n메모 및 정비 항목 분리 처리", "type": "process" },
+          { "box": "4. 트랜잭션 (Atomic)", "desc": "신규 테이블 INSERT -> 레거시 DELETE\n데이터 무결성 보장", "type": "solution" }
+        ])
+      }
     ],
     detailedTechStack: [
       { category: "Language", skills: ["Java", "Kotlin"] },
-      { category: "Architecture", skills: ["MVC → 일부 MVP 전환"] },
-      { category: "Database", skills: ["SQLite", "Room(일부)"] },
+      { category: "Architecture", skills: ["MVC → MVP Refactoring", "Layered Architecture"] },
+      { category: "Database", skills: ["SQLite", "Room", "Migration"] },
+      { category: "Utils", skills: ["BigDecimal", "DecimalFormat", "Java Record"] },
       { category: "Network", skills: ["Retrofit2", "OkHttp"] },
-      { category: "UI", skills: ["RecyclerView", "BottomSheet", "Custom Calendar"] },
-      { category: "Map", skills: ["Google Maps SDK"] },
-      { category: "External API", skills: ["오피넷(OPINET) 주유소 API"] }
+      { category: "Map", skills: ["Google Maps SDK"] }
     ],
     highlightColor: "blue"
   }
