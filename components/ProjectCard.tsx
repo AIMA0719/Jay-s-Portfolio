@@ -1,135 +1,120 @@
 import React from 'react';
 import { Project } from '../types';
-import { ChevronRight, CheckCircle2, AlertCircle, ArrowRightCircle, Smartphone, Layers } from 'lucide-react';
+import { Layers, Calendar, Users, Target, Info, CheckSquare } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
-  // Function to parse bold markdown (**text**)
-  const parseMarkdown = (text: string) => {
-    return text.replace(/\*\*(.*?)\*\*/g, '<span class="text-blue-200 font-semibold">$1</span>')
-               .replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1 py-0.5 rounded text-blue-300 font-mono text-xs">$1</code>');
-  };
-
   return (
-    <div className="animate-fadeIn w-full">
-      {/* 1. Header Section */}
-      <div className="mb-12 border-b border-slate-800 pb-8">
-        <div className="flex flex-col gap-3 mb-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-            {project.title}
-          </h2>
-          <div className="text-slate-400 font-mono text-lg text-left">
-            {project.period}
+    <div className="animate-fadeIn w-full space-y-12">
+      
+      {/* 1. Project Title */}
+      <div className="border-b border-slate-800 pb-8">
+        <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-2">
+          {project.title}
+        </h2>
+      </div>
+
+      {/* 2. Overview (개요) */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-blue-400 font-bold text-lg">
+          <Info size={20} />
+          <h3>개요</h3>
+        </div>
+        <p className="text-slate-300 text-lg leading-relaxed">
+          {project.overview}
+        </p>
+      </div>
+
+      {/* 3. Work Environment (작업 환경) */}
+      <div className="bg-slate-900/40 rounded-xl border border-slate-800 p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-slate-400 font-semibold text-sm uppercase tracking-wide">
+              <Users size={16} />
+              <span>담당 인원 구성</span>
+            </div>
+            <div className="text-white font-medium">
+              {project.team}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-slate-400 font-semibold text-sm uppercase tracking-wide">
+              <Target size={16} />
+              <span>담당 범위</span>
+            </div>
+            <div className="text-white font-medium">
+              {project.scope}
+            </div>
+          </div>
+           <div className="space-y-2">
+            <div className="flex items-center gap-2 text-slate-400 font-semibold text-sm uppercase tracking-wide">
+              <Calendar size={16} />
+              <span>기간</span>
+            </div>
+            <div className="text-white font-medium">
+              {project.period}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-16">
-        {/* LEFT COLUMN: Context & Action (5/12) */}
-        <div className="lg:col-span-5 space-y-10">
-          
-          {/* Context (Situation & Task) */}
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center gap-2 mb-3 text-white font-semibold text-lg">
-                <AlertCircle size={20} className="text-amber-500" />
-                담당 업무 및 배경
-              </div>
-              <p className="text-slate-300 leading-relaxed text-base bg-slate-900/50 p-5 rounded-xl border border-slate-800">
-                {project.situation}
-              </p>
+      {/* 4. Key Tasks & Details (주요 업무 및 상세 내용) - Table Style */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 text-emerald-400 font-bold text-lg">
+          <CheckSquare size={20} />
+          <h3>주요 업무 및 상세 내용</h3>
+        </div>
+        
+        <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
+          <div className="grid grid-cols-1">
+             {/* Table Header (Hidden on mobile, visible on desktop) */}
+            <div className="hidden md:grid md:grid-cols-[200px_1fr] border-b border-slate-800 bg-slate-900/80 text-slate-400 font-semibold text-sm">
+              <div className="px-6 py-4 border-r border-slate-800">업무</div>
+              <div className="px-6 py-4">상세 내용</div>
             </div>
-            
-            <div>
-               <div className="flex items-center gap-2 mb-3 text-white font-semibold text-lg">
-                <ArrowRightCircle size={20} className="text-blue-500" />
-                주요 과제
-              </div>
-              <p className="text-slate-300 leading-relaxed text-base bg-slate-900/50 p-5 rounded-xl border border-slate-800">
-                {project.task}
-              </p>
-            </div>
-          </div>
 
-          {/* Action (Architecture & Solutions) - Moved to Left Column for balance */}
-          <div>
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <ChevronRight className="text-blue-500" />
-              주요 구현 내용
-            </h3>
-            <div className="space-y-4">
-              {project.action.map((item, idx) => (
-                <div key={idx} className="flex gap-4 p-4 rounded-xl bg-slate-900/30 border border-slate-800/50 hover:bg-slate-900/60 transition-colors">
-                  <div className="mt-1 min-w-[24px] h-[24px] rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-400 border border-slate-700">
-                    {idx + 1}
+            {/* Table Body */}
+            <div className="divide-y divide-slate-800/50">
+              {project.keyFeatures.map((feature, idx) => (
+                <div key={idx} className="flex flex-col md:grid md:grid-cols-[200px_1fr] hover:bg-slate-800/20 transition-colors">
+                  <div className="px-6 py-3 md:py-4 font-bold text-slate-200 border-b md:border-b-0 md:border-r border-slate-800/50 bg-slate-900/40 md:bg-transparent">
+                    {feature.title}
                   </div>
-                  <p className="text-slate-300 leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: parseMarkdown(item) }} />
+                  <div className="px-6 py-3 md:py-4 text-slate-300 leading-relaxed text-sm md:text-base">
+                    {feature.desc}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-
-        </div>
-
-        {/* RIGHT COLUMN: Visuals & Results (7/12) */}
-        <div className="lg:col-span-7 space-y-10">
-          
-          {/* SCREENSHOT PLACEHOLDER */}
-          <div className="w-full aspect-video bg-slate-900 rounded-xl border-2 border-dashed border-slate-700 flex flex-col items-center justify-center group hover:border-blue-500/50 transition-colors relative overflow-hidden">
-             <div className="absolute inset-0 bg-gradient-to-br from-slate-800/20 to-slate-950/20" />
-             <Smartphone size={48} className="text-slate-600 mb-4 group-hover:text-blue-500 transition-colors" />
-             <p className="text-slate-500 text-sm font-medium">Real Screen Capture</p>
-             <p className="text-slate-600 text-xs mt-1">Coming Soon</p>
-          </div>
-
-          {/* Results */}
-          <div>
-             <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <CheckCircle2 className="text-emerald-500" />
-              성과 및 개선점
-            </h3>
-            <div className="bg-gradient-to-r from-emerald-950/20 to-transparent p-6 rounded-xl border-l-4 border-emerald-500/50">
-              <ul className="space-y-3">
-                {project.result.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-slate-200">
-                    <span className="text-emerald-500 font-bold mt-1">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
         </div>
       </div>
 
-      {/* BOTTOM SECTION: Detailed Tech Stack Table */}
-      <div className="pt-10 border-t border-slate-800">
-        <div className="flex items-center gap-2 mb-6">
-          <Layers size={24} className="text-blue-500" />
-          <h3 className="text-xl font-bold text-white">Tech Stack</h3>
+      {/* 5. Tech Stack (사용 기술 스택) */}
+      <div className="pt-6 border-t border-slate-800">
+        <div className="flex items-center gap-2 mb-6 text-purple-400 font-bold text-lg">
+          <Layers size={20} />
+          <h3>사용 기술 스택</h3>
         </div>
         
         <div className="bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left min-w-[600px]">
-              <tbody className="divide-y divide-slate-800/50">
-                {project.detailedTechStack.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-slate-800/30 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-slate-400 w-[180px] border-r border-slate-800/50 bg-slate-900/80 whitespace-nowrap">
-                      {item.category}
-                    </td>
-                    <td className="px-6 py-4 text-slate-200">
-                      {item.skills.join(', ')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <table className="w-full text-sm text-left">
+            <tbody className="divide-y divide-slate-800/50">
+              {project.detailedTechStack.map((item, idx) => (
+                <tr key={idx} className="hover:bg-slate-800/30 transition-colors">
+                  <td className="px-6 py-4 font-semibold text-slate-400 w-[160px] md:w-[200px] border-r border-slate-800/50 bg-slate-900/80 whitespace-nowrap align-top">
+                    {item.category}
+                  </td>
+                  <td className="px-6 py-4 text-slate-200 align-top leading-relaxed">
+                    {item.skills.join(', ')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
