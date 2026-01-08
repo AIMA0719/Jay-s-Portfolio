@@ -18,15 +18,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     }
   };
 
-  const getBadgeColor = (color?: string) => {
-    switch (color) {
-      case 'blue': return 'bg-blue-500/10 text-blue-400';
-      case 'emerald': return 'bg-emerald-500/10 text-emerald-400';
-      case 'indigo': return 'bg-indigo-500/10 text-indigo-400';
-      case 'purple': return 'bg-purple-500/10 text-purple-400';
-      case 'orange': return 'bg-orange-500/10 text-orange-400';
-      default: return 'bg-slate-800 text-slate-300';
-    }
+  // Function to parse bold markdown (**text**)
+  const parseMarkdown = (text: string) => {
+    return text.replace(/\*\*(.*?)\*\*/g, '<span class="text-blue-200 font-semibold">$1</span>')
+               .replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1 py-0.5 rounded text-blue-300 font-mono text-xs">$1</code>');
   };
 
   return (
@@ -37,17 +32,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 
       <div className="p-6 md:p-8 relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${getBadgeColor(project.highlightColor)}`}>
-                {project.role}
-              </span>
-              <span className="text-slate-500 text-sm font-mono">{project.period}</span>
-            </div>
-            <h3 className="text-2xl font-bold text-slate-100 group-hover:text-white transition-colors">
-              {project.title}
-            </h3>
+        <div className="mb-6">
+          <h3 className="text-2xl font-bold text-slate-100 group-hover:text-white transition-colors mb-2">
+            {project.title}
+          </h3>
+          <div className="text-slate-500 text-sm font-mono">
+            {project.period}
           </div>
         </div>
 
@@ -67,7 +57,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
               <div className="flex items-center gap-2 mb-2 text-slate-400 font-semibold text-sm uppercase tracking-wide">
                 <AlertCircle size={16} className="text-amber-500" />
-                Situation (배경)
+                배경
               </div>
               <p className="text-slate-300 text-sm leading-relaxed">
                 {project.situation}
@@ -76,7 +66,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
               <div className="flex items-center gap-2 mb-2 text-slate-400 font-semibold text-sm uppercase tracking-wide">
                 <ArrowRightCircle size={16} className="text-blue-500" />
-                Task (과제)
+                주요 과제
               </div>
               <p className="text-slate-300 text-sm leading-relaxed">
                 {project.task}
@@ -88,13 +78,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           <div>
             <h4 className="text-slate-200 font-semibold mb-3 flex items-center gap-2">
               <ChevronRight size={18} className="text-blue-400" />
-              Key Actions
+              기술적 문제와 해결 과정
             </h4>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {project.action.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3 text-slate-400 text-sm pl-2">
                   <div className="min-w-[4px] h-[4px] rounded-full bg-slate-600 mt-2" />
-                  <span dangerouslySetInnerHTML={{ __html: item.replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1 py-0.5 rounded text-blue-300 font-mono text-xs">$1</code>') }} />
+                  <span className="leading-relaxed" dangerouslySetInnerHTML={{ __html: parseMarkdown(item) }} />
                 </li>
               ))}
             </ul>
@@ -104,7 +94,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           <div className="bg-gradient-to-r from-blue-950/20 to-transparent p-4 rounded-xl border-l-4 border-blue-500">
              <h4 className="text-blue-200 font-semibold mb-3 flex items-center gap-2">
               <CheckCircle2 size={18} />
-              Results & Impact
+              성과 및 결과
             </h4>
             <ul className="space-y-2">
               {project.result.map((item, idx) => (

@@ -16,3 +16,8 @@ export interface SkillMetric {
   A: number;
   fullMark: number;
 }
+
+export interface SkillCategory {
+  category: string;
+  skills: string[];
+}
