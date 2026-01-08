@@ -62,40 +62,21 @@ export const PROJECTS: Project[] = [
       └── MOBD_HorizontalBarGauge.java     # 기존 바 형태 게이지`
       },
       {
-        title: "2. 아키텍처 개선: 하드코딩 vs 사용자 선택 구조",
+        title: "2. 아키텍처 개선: 하드코딩(AS-IS) → 설정 기반 유연 구조(TO-BE)",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "AS-IS: Fragment View", "desc": "observe('engine_speed')\n🔴 문제점: Index가 코드에 고정되어 확장 불가", "type": "error" },
+          { "box": "AS-IS: Database", "desc": "SELECT * FROM param\nWHERE index = 'engine_speed'", "type": "error" },
+          { "box": "⚡ Architecture Refactoring", "desc": "설정 파일(SSOT)과 사용자 설정(DataStore)을 통한\n의존성 분리 및 동적 바인딩 구현", "type": "default" },
+          { "box": "TO-BE 1. DashboardConfig", "desc": "정의: 'speed'는 ['engine', 'vcu'] 지원\n(모든 설정의 원천)", "type": "source" },
+          { "box": "TO-BE 2. DataStore", "desc": "선택: 사용자가 'vcu_speed'를 선택\nMapping: speed → vcu_speed", "type": "process" },
+          { "box": "TO-BE 3. Fragment View", "desc": "Code: observe(getKey('speed'))\n✅ 결과: 동적으로 'vcu_speed' 수신", "type": "solution" }
+        ])
+      },
+      {
+        title: "3. 핵심 문제 해결 및 최적화 (Troubleshooting)",
         type: "text",
-        content: ":::핵심 개념 : 데이터 인덱스는 차량 ECU에서 제공하는 각 센서 데이터를 식별하는 고유 문자열입니다.:::\n\n기존 레거시 코드는 데이터 Index가 뷰에 직접 명시되어 있어 확장이 불가능했습니다. 이를 사용자가 데이터를 선택하고 시스템이 이를 해석하여 실제 Index를 찾아오는 간접 참조 방식으로 변경하여 유연성을 확보했습니다."
-      },
-      {
-        title: "AS-IS: 확장 불가능한 기존 하드코딩 구조",
-        type: "diagram",
-        content: JSON.stringify([
-          { "box": "Fragment View", "desc": "observe('engine_speed')\n🔴 문제점: Index가 코드에 고정됨", "type": "error" },
-          { "box": "Database", "desc": "SELECT * FROM param\nWHERE index = 'engine_speed'", "type": "default" }
-        ])
-      },
-      {
-        title: "TO-BE: SSOT를 적용한 사용자 선택형 유연 구조",
-        type: "diagram",
-        content: JSON.stringify([
-          { "box": "DashboardConfig 설정 파일", "desc": "정의: 'speed'는 ['engine', 'vcu'] 지원", "type": "source" },
-          { "box": "DataStore 사용자 설정", "desc": "선택: 사용자가 'vcu_speed'를 선택\nMapping: speed -> vcu_speed", "type": "process" },
-          { "box": "Fragment View", "desc": "Code: observe(getKey('speed'))\n✅ 결과: 동적으로 'vcu_speed' 수신", "type": "solution" }
-        ])
-      },
-      {
-        title: "3. 스케줄링 최적화: 뷰페이저 스와이프 문제 해결",
-        type: "text",
-        content: "뷰페이저를 빠르게 넘길 때마다 블루투스 데이터 요청이 쌓여 앱이 멈추는 병목 현상이 발생했습니다. 이를 해결하기 위해 'ConcurrentLinkedQueue'를 도입하여 이전 페이지의 요청은 버리고 현재 보여지는 페이지의 요청만 처리하는 Last-Win 전략으로 개선했습니다."
-      },
-      {
-        title: "Last-Win 전략을 적용한 스케줄링 프로세스 흐름",
-        type: "diagram",
-        content: JSON.stringify([
-          { "box": "사용자 동작", "desc": "화면 빠르게 스와이프\n1페이지 → 2페이지 → 3페이지", "type": "default" },
-          { "box": "ConcurrentLinkedQueue 요청 큐", "desc": "1. 1페이지 요청 (자동 취소됨)\n2. 2페이지 요청 (자동 취소됨)\n3. 3페이지 요청 (대기 중)", "type": "process" },
-          { "box": "블루투스 매니저", "desc": "Polling Loop:\n큐에서 최신 요청 1개만 꺼내서 처리", "type": "solution" }
-        ])
+        content: ":::1. 프로파일 기반 설정 격리 (데이터 충돌 방지):::\n문제: 차량 변경 시 이전 차량의 설정값(DataStore)이 남아있어 데이터가 오동작하는 치명적인 버그가 있었습니다.\n해결: 설정 저장 시 키 생성 로직에 `profile_id`를 접두어로 포함시켜, 차량별로 저장소 공간을 논리적으로 격리했습니다.\n효과: 다수의 차량을 등록해도 설정 충돌이 발생하지 않으며, 각 차량 고유의 데이터 매핑이 완벽하게 보존됩니다.\n\n:::2. 멀티스레드 안정성 및 스케줄링 큐잉:::\n문제: 다중 스레드 접근 시 `ConcurrentModificationException`이 발생하고, 빠른 화면 전환 시 블루투스 요청이 병목을 일으켰습니다.\n해결: `ConcurrentHashMap`으로 스레드 안전성을 확보하고, `ConcurrentLinkedQueue` 기반의 Last-Win 전략을 도입하여 이전 페이지의 요청을 자동 취소했습니다.\n효과: 멀티스레드 환경 크래시 0건 달성 및 스와이프 시 끊김 없는 데이터 스트림을 구현했습니다.\n\n:::3. 데이터 식별 정확도 및 3단계 캐싱:::\n문제: 표준/제조사 데이터 키가 중복될 때 충돌이 발생하고, 잦은 DB 조회로 프레임 드랍이 있었습니다.\n해결: 제조사 데이터에 복합 키(`index|ecu_cmd`) 전략을 적용하여 식별성을 강화하고, `ParameterRepository`에 3단계(페이지-개별-키) 메모리 캐싱을 적용했습니다.\n효과: DB 쿼리 횟수 90% 감소로 화면 로딩 속도를 획기적으로 개선했습니다.\n\n:::4. Hybrid UI (XML + Compose) 통합:::\n문제: 기존 XML 레이아웃 기반의 수십 개 게이지를 한 번에 재작성하는 것은 리스크가 컸습니다.\n해결: `ComposeView`를 활용하여 신규 텍스트형 게이지부터 점진적으로 Jetpack Compose로 전환하는 하이브리드 구조를 채택했습니다.\n효과: 레거시 시스템의 안정성을 유지하면서도 최신 UI 기술을 성공적으로 도입했습니다."
       }
     ],
     detailedTechStack: [
@@ -109,25 +90,64 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "p4",
-    title: "배차 관리 기능",
+    title: "배차 관리 시스템",
     period: "2025.07 ~ 2025.08",
-    overview: "B2B 전용 앱에서 기업용 차량의 배차 신청, 승인, 사용, 반납까지 전 과정을 관리하는 시스템입니다. 동일 시간대 중복 배차를 자동 방지하고, 배차 목적과 이력을 체계적으로 추적합니다.",
+    overview: "B2B 전용 앱에서 기업용 차량의 배차 신청, 승인, 사용, 반납까지 전 과정을 관리하는 시스템입니다. MVVM 아키텍처와 Kotlin Coroutines 기반의 반응형 데이터 처리를 도입하여 실시간 배차 현황을 제공하고, 중복 배차 방지 및 자동화된 유효성 검사 로직을 구현했습니다.",
     team: "PM 1명, Android 1명, Server 1명, UX/UI 1명",
     scope: "법인 차량 배차 신청 플로우 및 차량 필터링 기능 전체 구현",
     keyFeatures: [
-      { title: "Repository 패턴 적용", desc: "API 호출 로직과 비즈니스 로직을 분리하여 유지보수성 및 테스트 용이성 확보" },
-      { title: "Flow 기반 비동기 처리", desc: "DispatchFragment의 데이터 스트림을 Flow로 리팩토링하여 반응형 데이터 처리" },
-      { title: "Paging 3 적용", desc: "수백 대 이상의 차량 목록을 효율적으로 로드하기 위해 무한 스크롤 페이징 구현" },
-      { title: "필터링 시스템", desc: "차량 타입, 상태별 필터 탭 기능 구현" },
-      { title: "DTO 설계", desc: "배차 기안, 이력, 차량 정보 등 성격에 맞는 데이터 클래스 분리 설계" }
+      { title: "Coroutine + Flow 비동기 아키텍처", desc: "기존 콜백 기반의 비동기 처리를 Coroutine과 Flow로 전면 리팩토링했습니다. viewModelScope를 활용해 생명주기를 관리하여 메모리 누수를 방지하고, Result 패턴을 도입해 성공/실패 케이스를 명확하게 분리 처리했습니다." },
+      { title: "StateFlow 기반 상태 관리", desc: "UI 상태(목록, 로딩, 에러 등)를 MutableStateFlow로 중앙에서 관리하고, View에서는 asStateFlow()로 노출된 불변 상태를 구독(Collect)하는 구조로 변경하여 데이터 일관성을 확보했습니다." },
+      { title: "Sealed Class 기반 동적 폼", desc: "체크박스, 시간 선택, 차량 선택 등 다양한 입력 타입이 혼재된 배차 신청 화면을 Sealed Class로 모델링하여, 컴파일 타임에 타입 안전성을 보장하고 RecyclerView에서 뷰 타입을 동적으로 렌더링하도록 구현했습니다." },
+      { title: "스레드 안전한 Repository 패턴", desc: "API 통신 로직을 Repository 계층으로 격리하고 Double-Checked Locking 방식으로 Singleton을 구현하여, 다중 스레드 환경에서도 안전하게 데이터에 접근하고 불필요한 객체 생성을 방지했습니다." },
+      { title: "지능형 데이터 검증 로직", desc: "사용자가 종료 시간을 시작 시간보다 빠르게 설정하는 등 논리적 오류 발생 시, 시스템이 이를 감지하여 종료 시간을 '시작 시간 + 30분'으로 자동 보정해주는 UX 친화적인 검증 로직을 ViewModel에 탑재했습니다." }
+    ],
+    technicalDetails: [
+      {
+        title: "1. 프로젝트 파일 구조",
+        type: "code",
+        content: `biz/Fragments/Dispatch/
+  ├── DispatchFragment.kt          # 배차 목록 UI (StateFlow 구독)
+  ├── DispatchViewModel.kt         # 상태 관리, 페이징, 필터 로직
+  ├── DispatchRepository.kt        # Singleton, API 통신, Flow 변환
+  ├── DispatchAdapter.kt           # 목록 렌더링
+  │
+  ├── DraftFragment.kt             # 배차 신청/상세 화면
+  ├── DraftViewModel.kt            # 신청 폼 상태 및 시간 유효성 검사
+  ├── DraftAdapter.kt              # Sealed Class 기반 동적 폼 어댑터
+  │
+  ├── FilterView.kt                # 커스텀 필터 UI
+  └── DispatchFragmentComplete.kt  # Compose 기반 UI (실험적 도입)
+
+  biz/DB/BIZ/Entities/
+  ├── DISPATCH.kt                  # 배차 목록 Room Entity
+  └── DRAFT.kt                     # 신청서 Room Entity
+
+  biz/Server/
+  └── RetrofitInterfaceBizKt.kt    # Suspend 함수 API 정의`
+      },
+      {
+        title: "2. 단방향 데이터 흐름 (Unidirectional Data Flow)",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "UI Layer (Fragment)", "desc": "User Action: 스크롤/필터 변경\nObserve: collect(newItemList)", "type": "source" },
+          { "box": "ViewModel Layer", "desc": "Logic: 중복 요청 방지, 페이징 계산\nState: _state.value update", "type": "process" },
+          { "box": "Repository Layer", "desc": "Stream: Flow<Result>\nCache: In-memory Caching", "type": "process" },
+          { "box": "Data Layer (Remote/DB)", "desc": "Retrofit: Suspend API Call\nRoom: Entity Mapping", "type": "solution" }
+        ])
+      },
+      {
+        title: "3. 핵심 로직 및 최적화 전략 (Core Logic)",
+        type: "text",
+        content: ":::1. Sealed Class를 활용한 다형성 폼 관리:::\n문제: 배차 신청 화면은 '시간 선택', '차량 선택', '목적 입력' 등 서로 다른 UI 요소가 복잡하게 섞여 있어 관리가 어려웠습니다.\n해결: `DraftItem`이라는 Sealed Class를 정의하고 `AllDay`, `Time`, `Selection` 등의 하위 타입을 만들었습니다. Adapter에서는 `when` 식을 사용하여 각 타입에 맞는 ViewHolder를 정확하게 생성하고 바인딩합니다.\n효과: 새로운 입력 타입이 추가되더라도 기존 코드를 수정할 필요 없이 타입만 확장하면 되므로 유지보수성이 크게 향상되었습니다.\n\n:::2. Double-Checked Locking Singleton:::\n문제: 여러 화면에서 동시에 Repository에 접근할 때 불필요한 인스턴스가 생성되거나 동시성 문제가 발생할 우려가 있었습니다.\n해결: `synchronized` 블록과 `volatile` 키워드를 사용한 Double-Checked Locking 패턴을 적용하여, 멀티스레드 환경에서도 안전하고 효율적인 싱글톤 인스턴스 생성을 보장했습니다.\n효과: 메모리 낭비를 막고 앱 전체에서 일관된 데이터 소스를 공유할 수 있게 되었습니다.\n\n:::3. 자동 시간 보정 알고리즘:::\n문제: 사용자가 실수로 종료 시간을 시작 시간보다 앞서게 설정하면 배차 신청이 실패하거나 데이터 무결성이 깨졌습니다.\n해결: `DraftViewModel` 내에 시간 검증 로직을 두어, 시작 시간이 종료 시간보다 늦어지는 순간 자동으로 종료 시간을 '시작 시간 + 30분'으로 재계산하여 업데이트합니다.\n효과: 사용자 실수를 사전에 방지하고 별도의 에러 팝업 없이 자연스러운 UX 흐름을 제공했습니다."
+      }
     ],
     detailedTechStack: [
       { category: "Language", skills: ["Kotlin"] },
-      { category: "Architecture", skills: ["MVVM + Repository 패턴"] },
-      { category: "Async", skills: ["Coroutine", "Flow"] },
-      { category: "Paging", skills: ["Paging 3"] },
-      { category: "UI", skills: ["ViewBinding", "RecyclerView", "BottomSheet"] },
-      { category: "Network", skills: ["Retrofit2 + Coroutine Adapter"] }
+      { category: "Architecture", skills: ["MVVM", "Repository Pattern", "Singleton"] },
+      { category: "Async", skills: ["Coroutines", "Flow", "StateFlow"] },
+      { category: "UI Logic", skills: ["Sealed Class (Polymorphism)", "DiffUtil"] },
+      { category: "Network", skills: ["Retrofit2", "Result Pattern"] }
     ],
     highlightColor: "purple"
   },
@@ -139,16 +159,79 @@ export const PROJECTS: Project[] = [
     team: "PM 1명, Android 1명, Data Analyst 1명",
     scope: "멀티 광고 네트워크 SDK 통합 및 워터폴/비딩 시스템 구조 설계",
     keyFeatures: [
-      { title: "멀티 네트워크 통합", desc: "AdMob 외 Yandex, IronSource 등 5개 이상의 글로벌 광고 네트워크 SDK 통합" },
-      { title: "GDPR/CCPA 대응", desc: "유럽 및 캘리포니아 사용자 대상 개인정보 처리 방침 동의 팝업 및 로직 구현" },
-      { title: "광고 로드 최적화", desc: "네트워크 상태에 따라 타임아웃 설정 및 실패 시 재요청하는 Fallback 로직 설계" },
-      { title: "비율 검사 로직", desc: "동영상 광고 등 세로 비율 광고가 UI를 깨뜨리는 것을 방지하기 위한 사전 검사 적용" }
+      { title: "AdMob 미디에이션 기반 광고 통합 시스템 구축", desc: "기존에는 단일 광고 네트워크만 사용하여 광고 채우기율(Fill Rate)이 낮고 수익이 제한적이었습니다. 이를 해결하기 위해 Google AdMob 미디에이션을 도입하여 Yandex 등 외부 광고 네트워크를 연결하고, 워터폴 방식으로 광고 요청이 실패하면 다음 네트워크로 자동 전환되도록 구현했습니다. 이를 통해 광고 채우기율을 높이고 수익을 개선했습니다." },
+      { title: "광고 타입별 전용 Manager 설계", desc: "배너, 네이티브, 전면, 보상형, 앱오픈 광고 등 5가지 광고 타입을 각각 독립된 Manager 클래스로 분리하여 관리합니다. 싱글톤 패턴을 적용하여 메모리 효율을 높이고, 각 Manager가 광고 로드/표시/해제의 생명주기를 독립적으로 관리하도록 설계했습니다." },
+      { title: "조건부 광고 노출 시스템 구현", desc: "사용자 경험을 해치지 않으면서 수익을 극대화하기 위해 다층 조건 검사 시스템을 구현했습니다. 지역(한국/일본 제외), 구독 상태, 자사 스캐너 구매 여부, 네트워크 상태 등을 종합적으로 판단하여 광고 노출 여부를 결정합니다. 또한 'N일간 보지 않기' 기능을 통해 사용자가 광고 빈도를 조절할 수 있도록 했습니다." },
+      { title: "자체 광고 시스템과 AdMob 통합", desc: "서버에서 제공하는 자체 프로모션 광고와 AdMob 광고를 하나의 뷰에서 통합 관리하는 CustomNativeView를 개발했습니다. 화면별로 적절한 광고 타입을 자동 선택하고, 자체 광고가 없을 경우 AdMob 광고로 대체되는 폴백 로직을 구현했습니다." },
+      { title: "GDPR 동의 및 광고 초기화 흐름 설계", desc: "유럽 사용자를 위한 GDPR 동의 절차를 UserMessagingPlatform으로 구현하고, 동의 완료 후에만 광고 SDK가 초기화되도록 설계했습니다. 앱 시작 시 네이티브 광고를 병렬로 미리 로드하여 첫 화면 진입 시 광고가 즉시 표시되도록 최적화했습니다." }
+    ],
+    technicalDetails: [
+      {
+        title: "1. 주요 파일 구조",
+        type: "code",
+        content: `Tools/AD/
+  ├── AdMob/
+  │   ├── BannerAdManager.java          # 배너 광고 (싱글톤)
+  │   ├── NativeAdManager.java          # 네이티브 광고 (병렬 로드)
+  │   ├── InterstitialAdManager.java    # 전면 광고
+  │   ├── RewardAdManager.java          # 보상형 광고
+  │   └── AppFinishNativeAd.java        # 앱 종료 시 광고
+  │
+  ├── InfocarAd/
+  │   ├── InfocarAdManager.java         # 서버 기반 자체 광고
+  │   ├── InfocarPopupAdDialog.java     # 팝업 광고
+  │   └── SubscriptionDialog.java       # 구독 프로모션
+  │
+  ├── YandexAdsEvent/                   # 미디에이션 어댑터
+  │   ├── CustomEvent.java
+  │   └── YandexBannerEventLoader.java
+  │
+  └── Tools/
+      ├── Manager/GdprManager.java      # GDPR 동의 및 초기화
+      └── View/CustomNativeView.java    # 자체광고 + AdMob 통합 뷰`
+      },
+      {
+        title: "2. 광고 시스템 아키텍처",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "1. 초기화 계층 (Initialization)", "desc": "GdprManager\n• GDPR 동의 요청 (UMP SDK)\n• MobileAds.initialize() 수행\n• 네이티브 광고 병렬 로드 시작", "type": "source" },
+          { "box": "2. 매니저 계층 (AdManagers)", "desc": "타입별 독립 Manager (싱글톤)\n• Banner/Native/Reward 등 기능 분리\n• 로드/캐싱/생명주기 관리", "type": "process" },
+          { "box": "3. 뷰 계층 (Custom Views)", "desc": "통합 뷰 시스템 (CustomNativeView)\n• AdMob(미디에이션) 표시\n• 로드 실패/지연 시 Fallback 처리", "type": "process" },
+          { "box": "4. 자체 광고 계층 (Fallback)", "desc": "InfocarAdManager (서버 기반)\n• 모든 네트워크 실패 시 최후 수단\n• 자체 프로모션 및 공지 사항 노출", "type": "solution" }
+        ])
+      },
+      {
+        title: "3. 핵심 문제 해결 및 최적화 (Troubleshooting)",
+        type: "text",
+        content: ":::1. 세로 동영상 광고로 인한 UI 붕괴 방지:::\n문제: 네이티브 광고 영역에 '세로 비율(Portrait)' 동영상이 로드될 경우 레이아웃이 깨지는 현상이 발생했습니다.\n해결: `NativeAdManager`에서 미디어의 Aspect Ratio를 사전에 검사하여, 비율이 1.0 미만(세로)인 경우 최대 3회까지 재요청하는 로직을 추가했습니다.\n효과: UI 일관성을 유지하고, 사용자 경험에 최적화된 가로형 광고를 우선적으로 노출했습니다.\n\n:::2. 스플래시 로딩 속도 70% 단축 (병렬 처리):::\n문제: 5가지 타입(배너, 메인, 메뉴, 종료 등)의 광고를 순차적으로 로드하다 보니 앱 진입 속도가 크게 지연되었습니다.\n해결: `CompletableFuture`를 도입하여 모든 광고 로딩을 병렬로 처리하고, 10초 타임아웃을 설정하여 무한 대기를 방지했습니다.\n효과: 초기 광고 준비 시간을 기존 5초에서 1.5초 수준으로 약 70% 단축했습니다.\n\n:::3. 중복 노출 및 불필요한 요청 제거:::\n문제: Fragment 재생성 시마다 동일한 광고가 반복 로드되거나, 구독자에게도 광고 요청이 발생하는 낭비가 있었습니다.\n해결: 마지막으로 노출된 Fragment의 클래스명을 추적하여 중복 표시를 방지하고, 지역·구독·스캐너 연결 여부를 종합 판단하는 `AdvertisingTerms()` 검증 함수를 구현했습니다.\n효과: 불필요한 네트워크 리소스 소모를 줄이고, 타겟팅 정확도를 높여 eCPM 효율을 개선했습니다."
+      },
+      {
+        title: "4. 광고 노출 조건 판단 흐름",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "1. 빌드/지역 조건", "desc": "Biz 버전인가? (X)\n한국/일본인가? (X)\n(해당 시 광고 미노출)", "type": "process" },
+          { "box": "2. 구독/구매 상태", "desc": "유료 구독자인가? (X)\n스캐너 구매자인가? (X)\n(구매자는 광고 미노출)", "type": "process" },
+          { "box": "3. 빈도 제한 (Cap)", "desc": "'N일간 보지 않기' 설정 확인\n기간 내 Dismiss 했으면 통과", "type": "process" },
+          { "box": "✅ 최종 결정", "desc": "모든 미노출 조건 통과 시\n광고 요청 및 표시 시작", "type": "solution" }
+        ])
+      },
+      {
+        title: "5. 미디에이션 워터폴 (Waterfall) 흐름",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "1. AdMob 요청", "desc": "Google 네트워크 직접 호출\n(가장 높은 eCPM 우선 순위)", "type": "source" },
+          { "box": "2. Yandex Ads", "desc": "Fallback: AdMob 실패 시\nYandex 네트워크 자동 전환", "type": "process" },
+          { "box": "3. 최종 Fallback", "desc": "네트워크 광고 모두 실패 시\n서버 기반 자체 광고 표시", "type": "solution" }
+        ])
+      }
     ],
     detailedTechStack: [
       { category: "Language", skills: ["Java", "Kotlin"] },
       { category: "Ad SDKs", skills: ["Google Admob", "Yandex", "IronSource", "Pangle", "AppLovin"] },
+      { category: "Mediation", skills: ["AdMob Mediation (Waterfall/Bidding)"] },
+      { category: "Compliance", skills: ["UMP SDK (GDPR)", "CCPA"] },
       { category: "Config", skills: ["Firebase Remote Config"] },
-      { category: "Async", skills: ["Handler", "Coroutine"] }
+      { category: "Async", skills: ["CompletableFuture", "Handler", "Coroutine"] }
     ],
     highlightColor: "orange"
   },
@@ -160,17 +243,81 @@ export const PROJECTS: Project[] = [
     team: "PM 1명, Android 1명, UX/UI 1명",
     scope: "Android Auto용 대시보드 화면 개발 및 모바일 앱 양방향 동기화",
     keyFeatures: [
-      { title: "CarAppService 구현", desc: "Android Auto 전용 세션 및 스크린 매니저를 구현하여 차량 연결 생명주기 관리" },
-      { title: "화면 동기화", desc: "모바일 앱 내에서 대시보드 변경 시 차량 디스플레이에도 실시간 반영되도록 동기화 로직 구현" },
-      { title: "스케줄 동기화", desc: "OBD 데이터 수신 주기를 앱과 Auto가 공유하여 데이터 불일치 방지" },
-      { title: "백그라운드 연결", desc: "앱이 백그라운드/종료 상태에서도 Auto 연결 유지되도록 포그라운드 서비스 개발" },
-      { title: "Demo 모드", desc: "차량 스캐너 연결 없는 환경에서도 UI 테스트가 가능한 더미 데이터 모드 개발" }
+      { title: "CarAppService 기반 Android Auto 앱 구현", desc: "Android Auto Car App Library를 사용하여 차량 디스플레이에서 OBD 데이터를 확인할 수 있는 앱을 구현했습니다. CarAppService를 상속한 CarService 클래스에서 세션과 화면 생명주기를 관리하고, HostValidator를 통해 신뢰할 수 있는 호스트만 연결을 허용하도록 보안을 적용했습니다." },
+      { title: "다중 Screen 구조 설계", desc: "Android Auto의 Template 제약 내에서 최적의 사용자 경험을 제공하기 위해 용도별 Screen을 분리했습니다. ConnectionScreen은 OBD 연결 상태와 차량 정보를 표시하고, DashboardScreen은 페이지 선택을, StandardDataScreen은 실시간 게이지 데이터를 표시합니다. 각 Screen은 싱글톤으로 관리되어 상태가 유지됩니다." },
+      { title: "휴대폰-차량 디스플레이 간 실시간 동기화", desc: "휴대폰 앱에서 수신한 OBD 데이터가 Android Auto 화면에 즉시 반영되도록 동기화 시스템을 구현했습니다. DataBridge를 통해 전역 상태를 공유하고, Handler 기반 메시지 시스템으로 UI 업데이트를 트리거합니다. 1초 쓰로틀링을 적용하여 과도한 화면 갱신으로 인한 깜빡임을 방지했습니다." },
+      { title: "표준/제조사 데이터 동적 전환", desc: "사용자가 표준 OBD2 데이터와 제조사 전용 데이터(MOBD) 사이를 자유롭게 전환할 수 있도록 구현했습니다. 데이터 모드 전환 시 기존 데이터를 초기화하고, 해당 모드에 맞는 스케줄과 프로토콜을 자동으로 재설정합니다. Android Auto 화면에서 전환해도 휴대폰 앱과 동기화됩니다." },
+      { title: "Foreground Service 기반 안정적 백그라운드 실행", desc: "운전 중 앱이 백그라운드로 전환되어도 OBD 데이터 수신이 중단되지 않도록 Foreground Service를 적용했습니다. 위치 권한 상태에 따라 적절한 Service Type을 설정하고, 앱 종료 시에도 서비스가 유지되도록 stopWithTask='false'를 적용했습니다." }
+    ],
+    technicalDetails: [
+      {
+        title: "1. 주요 파일 구조",
+        type: "code",
+        content: `AndroidAuto/
+  ├── CarService.java                    # CarAppService 구현체 (진입점)
+  ├── AndroidAutoMainScreen.java         # 메인 화면 (ListTemplate)
+  ├── AndroidAutoClickListener.java      # 클릭 이벤트 처리
+  ├── EmptyScreen.java                   # 경고/안내 화면
+  │
+  ├── ConnectionScreen/
+  │   └── ConnectionScreen.java          # ECU/OBD 연결 상태 표시
+  │
+  ├── DashBoardScreen/
+  │   ├── DashboardScreen.java           # 대시보드 페이지 선택
+  │   └── StandardDataScreen.java        # 실시간 데이터 표시
+  │
+  └── Demo/
+      ├── AndroidAutoDemoManager.java    # 데모 모드 관리
+      └── DemoDataSet.java               # 시뮬레이션 데이터 생성
+
+  DataManager/DataBridge/
+  ├── Status_DataBridge.java             # 전역 상태 (CarContext 포함)
+  ├── State_DataBridge.java              # 연결 상태 플래그
+  └── DataUpdate.java                    # UI 업데이트 트리거
+
+  MOBD_Data/
+  └── ExtendedConnectionManager.java     # 스케줄 및 모드 전환 관리`
+      },
+      {
+        title: "2. Android Auto 아키텍처",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "CarService (CarAppService)", "desc": "• onCreateSession() → Session 생성\n• HostValidator → 보안 검증\n• Foreground Service 관리", "type": "source" },
+          { "box": "Screen Layer", "desc": "Main → ConnectionScreen (연결 상태)\n↓\nDashboardScreen (선택)\n↓\nStandardDataScreen (실시간 데이터)", "type": "process" },
+          { "box": "Data Sync (Bridge)", "desc": "Status_DataBridge ↔ UI Handler\n실시간 OBD 데이터 중계 및 상태 공유", "type": "process" },
+          { "box": "Schedule Management", "desc": "ExtendedConnectionManager\n표준/제조사 데이터 모드 관리 및 스케줄링", "type": "solution" }
+        ])
+      },
+      {
+        title: "3. 안정성 확보 및 트러블 슈팅 (Stability & Troubleshooting)",
+        type: "text",
+        content: ":::1. UI 플리커링(깜빡임) 방지:::\n문제: OBD 데이터가 100ms 단위로 수신될 때마다 화면 갱신을 요청하여, 차량 디스플레이에서 심한 깜빡임과 CPU 과부하가 발생했습니다.\n해결: `StandardDataScreen`에 1초 단위의 쓰로틀링(Throttling) 로직을 적용하여, 마지막 갱신 이후 1초가 지나지 않았으면 요청을 무시하도록 최적화했습니다.\n효과: 화면 깜빡임을 제거하고 안정적인 프레임을 확보했습니다.\n\n:::2. 메모리 누수 방지:::\n문제: 잦은 연결/해제 반복 시 싱글톤 인스턴스와 핸들러가 해제되지 않아 메모리 점유율이 증가했습니다.\n해결: `onDestroy()`에서 `bleManager.disconnect()` 호출 및 Handler 콜백 제거(removeCallbacksAndMessages)를 명시적으로 수행했습니다."
+      },
+      {
+        title: "4. 데이터 동기화 흐름",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "1. OBD 스캐너", "desc": "Bluetooth 통신\n데이터 수신", "type": "source" },
+          { "box": "2. 휴대폰 앱 (Phone)", "desc": "DataUpdate.updateDashBoard()\nExecutorService로 데이터 파싱", "type": "process" },
+          { "box": "3. Shared Memory", "desc": "StandardDataScreen Map에 Put\n(스레드 안전 처리)", "type": "process" },
+          { "box": "4. Android Auto UI", "desc": "Handler.sendMessage() → refreshUI()\n(1초 쓰로틀링 적용하여 깜빡임 방지)", "type": "solution" }
+        ])
+      },
+      {
+        title: "5. 표준/제조사 데이터 전환 흐름",
+        type: "diagram",
+        content: JSON.stringify([
+          { "box": "1. 사용자 요청", "desc": "화면에서 모드 전환 버튼 클릭\n(표준 ↔ 제조사)", "type": "source" },
+          { "box": "2. CarService", "desc": "changeStandardSchedule() 호출\n현재 모드 확인 및 플래그 변경", "type": "process" },
+          { "box": "3. Schedule Manager", "desc": "기존 스케줄 중단 및 데이터 초기화\n새 모드에 맞는 스케줄 재설정", "type": "solution" }
+        ])
+      }
     ],
     detailedTechStack: [
-      { category: "Language", skills: ["Kotlin"] },
+      { category: "Language", skills: ["Kotlin", "Java"] },
       { category: "Platform", skills: ["Android Auto (Car App Library)"] },
-      { category: "Communication", skills: ["BroadcastReceiver", "Service"] },
-      { category: "State Mgmt", skills: ["LiveData"] }
+      { category: "Communication", skills: ["BroadcastReceiver", "Service", "Handler"] },
+      { category: "State Mgmt", skills: ["LiveData", "Singleton"] }
     ],
     highlightColor: "indigo"
   },
