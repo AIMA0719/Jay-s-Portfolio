@@ -11,14 +11,7 @@ const Hero: React.FC = () => {
         
         {/* Text Content */}
         <div className="space-y-8 flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            Open to Work
-          </div>
-
+          
           <div>
             <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tight mb-4">
               {HERO_DATA.name}

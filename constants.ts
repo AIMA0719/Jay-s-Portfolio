@@ -36,7 +36,7 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "p4",
-    title: "배차 관리 기능 (인포카 비즈)",
+    title: "배차 관리 기능",
     period: "2025.07 ~ 2025.08",
     overview: "B2B 전용 앱에서 기업용 차량의 배차 신청, 승인, 사용, 반납까지 전 과정을 관리하는 시스템입니다. 동일 시간대 중복 배차를 자동 방지하고, 배차 목적과 이력을 체계적으로 추적합니다.",
     team: "PM 1명, Android 1명, Server 1명, UX/UI 1명",
