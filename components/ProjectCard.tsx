@@ -1,6 +1,6 @@
 import React from 'react';
 import { Project } from '../types';
-import { Layers, Calendar, Users, Target, Info, CheckSquare, Code2, ArrowDown, Database, Server, Smartphone, Settings, Lightbulb } from 'lucide-react';
+import { Layers, Calendar, Users, Target, Info, CheckSquare, Code2, ArrowDown, Lightbulb } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
@@ -28,7 +28,6 @@ const DiagramRenderer: React.FC<{ content: string }> = ({ content }) => {
         let borderClass = "border-slate-600";
         let bgClass = "bg-slate-800";
         let textClass = "text-slate-200";
-        let icon = null;
 
         if (step.type === 'error') {
           borderClass = "border-red-500/50";
