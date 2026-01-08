@@ -1,3 +1,4 @@
+
 export interface TechCategory {
   category: string;
   skills: string[];
@@ -8,6 +9,12 @@ export interface KeyFeature {
   desc: string;
 }
 
+export interface TechnicalDetail {
+  title: string;
+  content: string;
+  type: 'text' | 'code' | 'diagram';
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -16,6 +23,7 @@ export interface Project {
   team: string;
   scope: string;
   keyFeatures: KeyFeature[];
+  technicalDetails?: TechnicalDetail[]; // New optional field for deep dive
   detailedTechStack: TechCategory[];
   highlightColor?: string;
 }
