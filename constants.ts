@@ -38,7 +38,7 @@ export const PROJECTS: Project[] = [
     id: "p4",
     title: "배차 관리 기능 (인포카 비즈)",
     period: "2025.07 ~ 2025.08",
-    overview: "법인 차량 관리 서비스에서 배차 신청, 승인, 반려 프로세스를 디지털화하고 효율적인 차량 관리를 지원하는 시스템",
+    overview: "B2B 전용 앱에서 기업용 차량의 배차 신청, 승인, 사용, 반납까지 전 과정을 관리하는 시스템입니다. 동일 시간대 중복 배차를 자동 방지하고, 배차 목적과 이력을 체계적으로 추적합니다.",
     team: "PM 1명, Android 1명, Server 1명, UX/UI 1명",
     scope: "법인 차량 배차 신청 플로우 및 차량 필터링 기능 전체 구현",
     keyFeatures: [
@@ -62,7 +62,7 @@ export const PROJECTS: Project[] = [
     id: "p5",
     title: "광고 시스템 리뉴얼",
     period: "2025.03 ~ 2025.05",
-    overview: "단일 광고 네트워크의 수익 한계를 극복하고 글로벌 사용자(러시아/CIS 등)에게 최적화된 광고를 제공하기 위한 시스템 리뉴얼",
+    overview: "Google AdMob 미디에이션을 통해 다수의 외부 광고 네트워크를 연결하고, 워터폴 알고리즘 기반으로 광고를 제공하는 시스템입니다. 사용자의 지역, 구독 상태 등을 확인하여 광고를 효율적으로 노출하고 수익 증가를 목표로 합니다.",
     team: "PM 1명, Android 1명, Data Analyst 1명",
     scope: "멀티 광고 네트워크 SDK 통합 및 워터폴/비딩 시스템 구조 설계",
     keyFeatures: [
@@ -83,7 +83,7 @@ export const PROJECTS: Project[] = [
     id: "p3",
     title: "Android Auto 연동",
     period: "2024.10 ~ 2025.02",
-    overview: "운전 중 스마트폰 조작 없이 차량 디스플레이에서 데이터를 안전하게 확인하기 위한 Android Auto 서비스 및 데이터 동기화 구현",
+    overview: "기존 모바일/태블릿 환경에서 제공하던 OBD 실시간 데이터 조회 기능을 Android Auto 환경으로 확장한 프로젝트입니다. 표준 데이터와 제조사 전용 데이터 간 동적 전환을 지원하며, 휴대폰 앱과 차량 디스플레이 간 화면 상태를 자동 동기화합니다.",
     team: "PM 1명, Android 1명, UX/UI 1명",
     scope: "Android Auto용 대시보드 화면 개발 및 모바일 앱 양방향 동기화",
     keyFeatures: [
@@ -105,7 +105,7 @@ export const PROJECTS: Project[] = [
     id: "p1",
     title: "차계부 시스템 리뉴얼",
     period: "2022.10 ~ 2023.06",
-    overview: "파편화된 주유/정비/세차 기록을 통합 관리하고 서버 동기화를 지원하여 사용자 경험을 개선한 차계부 시스템",
+    overview: "주유, 정비, 세차, 소모품 교체 등 차량 유지비를 통합 관리하는 가계부 시스템입니다. 월별 비용 비교와 항목별 지출 비중을 시각화하고, 소모품 교체 주기를 거리·시간 기준으로 자동 계산하여 알림을 제공합니다.",
     team: "PM 1명, Android 1명, Server 1명, Design 1명",
     scope: "주유/정비/세차 기록 기능 전체 설계 및 소모품 관리 시스템 통합 개발",
     keyFeatures: [
